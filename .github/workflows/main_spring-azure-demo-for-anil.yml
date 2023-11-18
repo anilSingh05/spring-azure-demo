@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  gradle:
     runs-on: windows-latest
 
     steps:
@@ -21,8 +21,12 @@ jobs:
         with:
           java-version: '8'
 
-      - name: Build with Gradle
-        run: gradle clean build
+      - uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: runOnGitHub
+          wrapper-cache-enabled: true
+          dependencies-cache-enabled: true
+          configuration-cache-enabled: true
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -32,7 +36,7 @@ jobs:
 
   deploy:
     runs-on: windows-latest
-    needs: build
+    needs: gradle
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
